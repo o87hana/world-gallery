@@ -1,24 +1,12 @@
-type Lang = "ja" | "en";
+import { ContactForm } from "@/components/ContactForm";
 
-const COPY: Record<Lang, { title: string; description: string }> = {
-  ja: {
-    title: "Order / Contact",
-    description: "フォームとメール送信処理は次のフェーズで実装します。先にルーティングとセクション構造だけ整えました。",
-  },
-  en: {
-    title: "Order / Contact",
-    description: "Form UI and mail handling will follow in the next phase. Routing and page shell are ready.",
-  },
-};
-
-export default async function ContactPage({ params }: { params: Promise<{ lang: Lang }> }) {
-  const { lang } = await params;
-  const t = COPY[lang];
-
+export default async function ContactPage() {
   return (
-    <section className="rounded-2xl bg-[#f6f2ea] p-10 text-[#0f1230] shadow-lg">
-      <h1 className="text-3xl font-semibold tracking-tight">{t.title}</h1>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#1d2038]">{t.description}</p>
+    <section className="rounded-2xl bg-[#f6f2ea] px-6 py-12 text-[#0f1230] shadow-lg sm:px-12">
+      <div className="mx-auto max-w-3xl rounded-2xl bg-white px-8 py-10 shadow-md sm:px-12 sm:py-12">
+        <h1 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">Contact Us</h1>
+        <ContactForm />
+      </div>
     </section>
   );
 }
