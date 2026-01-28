@@ -1,4 +1,4 @@
 // schemaTypes/index.ts
-import {work} from './work'
+import {divider, imageBlock, imageGridBlock, spacer, work} from './work'
 
-export const schemaTypes = [work]
+export const schemaTypes = [work, imageBlock, imageGridBlock, spacer, divider]

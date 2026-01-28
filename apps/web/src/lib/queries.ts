@@ -16,7 +16,7 @@ export const GALLERY_QUERY = /* groq */ `
   title,
   "slug": slug.current,
   category,
-  "excerpt": pt::text(body),
+  "excerpt": pt::text(coalesce(blocks, body)),
   "heroUrl": heroImage.asset->url
 }
 `;
@@ -31,6 +31,11 @@ export const WORK_BY_SLUG_QUERY = /* groq */ `
   createdAt,
   location { lat, lng },
   "heroUrl": heroImage.asset->url,
+  blocks[]{
+    ...,
+    image{..., asset},
+    images[]{..., asset}
+  },
   "gallery": gallery[]{
     _key,
     alt,
