@@ -57,9 +57,29 @@ type GlobeDatum = Pin & {
   coverUrl?: string;
 };
 
+type HoverState = {
+  primary: GlobeDatum;
+  items: GlobeDatum[];
+};
+
+const EARTH_RADIUS_KM = 6371;
+const POPUP_RANGE_KM = 100;
+const toRad = (deg: number) => (deg * Math.PI) / 180;
+const distanceKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const sinDLat = Math.sin(dLat / 2);
+  const sinDLng = Math.sin(dLng / 2);
+  const h = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLng * sinDLng;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
+};
+
 export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
   const router = useRouter();
-  const [hover, setHover] = useState<Pin | null>(null);
+  const [hover, setHover] = useState<HoverState | null>(null);
+  const [selected, setSelected] = useState<HoverState | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<any>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -79,6 +99,22 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
       })),
     [pins, lang]
   );
+
+  const nearbyMap = useMemo(() => {
+    const map = new Map<string, GlobeDatum[]>();
+    for (let i = 0; i < data.length; i += 1) {
+      const base = data[i];
+      const group: GlobeDatum[] = [];
+      for (let j = 0; j < data.length; j += 1) {
+        const candidate = data[j];
+        if (distanceKm(base, candidate) <= POPUP_RANGE_KM) {
+          group.push(candidate);
+        }
+      }
+      map.set(base.id, group);
+    }
+    return map;
+  }, [data]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -173,34 +209,84 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           pointColor={(d) => (d as GlobeDatum).color}
           pointAltitude={0.01}
           pointRadius={0.45}
-          onPointHover={(d: unknown) => setHover((d as GlobeDatum) ?? null)}
-          onPointClick={(d: unknown) => router.push(`/${lang}/work/${(d as GlobeDatum).slug}`)}
+          onPointHover={(d: unknown) => {
+            if (selected) return;
+            const datum = d as GlobeDatum | null;
+            if (!datum) {
+              setHover(null);
+              return;
+            }
+            const items = nearbyMap.get(datum.id) ?? [datum];
+            setHover({ primary: datum, items });
+          }}
+          onPointClick={(d: unknown) => {
+            const datum = d as GlobeDatum;
+            const items = nearbyMap.get(datum.id) ?? [datum];
+            if (items.length > 1) {
+              setSelected({ primary: datum, items });
+              return;
+            }
+            router.push(`/${lang}/work/${datum.slug}`);
+          }}
         />
 
         {/* hoverカード */}
-        {hover && (
+        {(selected ?? hover) && (
           <div className="absolute left-4 bottom-4 w-[320px] rounded-2xl bg-white/95 shadow-xl p-4">
-            {hover.coverImage && (
+            {selected && (
+              <button
+                className="absolute right-3 top-3 text-sm text-black/50 hover:text-black"
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            )}
+            {(selected ?? hover)!.primary.coverImage && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={urlFor(hover.coverImage).width(640).quality(70).url()}
+                src={urlFor((selected ?? hover)!.primary.coverImage).width(640).quality(70).url()}
                 alt=""
                 className="h-40 w-full rounded-xl object-cover"
               />
             )}
-            <div className="mt-3 text-sm text-black/60">{hover.category}</div>
-            <div className="text-lg font-semibold">{lang === "ja" ? hover.title_ja : hover.title_en || "Coming soon"}</div>
-            {((lang === "ja" ? hover.location.placeName_ja : hover.location.placeName_en) ?? "") && (
+            <div className="mt-3 text-sm text-black/60">{(selected ?? hover)!.primary.category}</div>
+            <div className="text-lg font-semibold">
+              {lang === "ja" ? (selected ?? hover)!.primary.title_ja : (selected ?? hover)!.primary.title_en || "Coming soon"}
+            </div>
+            {((lang === "ja"
+              ? (selected ?? hover)!.primary.location.placeName_ja
+              : (selected ?? hover)!.primary.location.placeName_en) ?? "") && (
               <div className="text-sm text-black/70 mt-1">
-                {lang === "ja" ? hover.location.placeName_ja : hover.location.placeName_en}
+                {lang === "ja"
+                  ? (selected ?? hover)!.primary.location.placeName_ja
+                  : (selected ?? hover)!.primary.location.placeName_en}
               </div>
             )}
-            <button
-              className="mt-3 inline-flex items-center justify-center rounded-xl bg-[#0f1230] px-4 py-2 text-white text-sm"
-              onClick={() => router.push(`/${lang}/work/${hover.slug}`)}
-            >
-              Open
-            </button>
+            {(selected ?? hover)!.items.length === 1 ? (
+              <button
+                className="mt-3 inline-flex items-center justify-center rounded-xl bg-[#0f1230] px-4 py-2 text-white text-sm"
+                onClick={() => router.push(`/${lang}/work/${(selected ?? hover)!.primary.slug}`)}
+              >
+                Open
+              </button>
+            ) : (
+              <div className="mt-3">
+                <div className="text-xs uppercase tracking-wide text-black/50">Nearby</div>
+                <div className="mt-2 max-h-40 overflow-auto space-y-2">
+                  {(selected ?? hover)!.items.map((item) => (
+                    <button
+                      key={item.id}
+                      className="w-full rounded-xl border border-black/10 px-3 py-2 text-left text-sm hover:bg-black/5"
+                      onClick={() => router.push(`/${lang}/work/${item.slug}`)}
+                    >
+                      <div className="font-medium">{lang === "ja" ? item.title_ja : item.title_en || "Coming soon"}</div>
+                      {item.placeName && <div className="text-xs text-black/60">{item.placeName}</div>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
