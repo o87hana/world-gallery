@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Image } from "sanity";
+import type { SanityImageSource } from "@sanity/image-url";
 import { AmbientLight, Color, DirectionalLight } from "three";
 import { CategoryColor } from "@/lib/colors";
 import { urlFor } from "@/lib/sanity.client";
@@ -45,7 +45,7 @@ type Pin = {
   title_ja: string;
   title_en?: string;
   location: { lat: number; lng: number; placeName_ja?: string; placeName_en?: string };
-  coverImage: Image;
+  coverImage?: SanityImageSource;
 };
 
 type GlobeDatum = Pin & {
@@ -163,15 +163,14 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           backgroundColor="rgba(0,0,0,0)"
           width={size.width || undefined}
           height={size.height || undefined}
-          style={{ width: "100%", height: "100%", display: "block" }}
           // 操作感：慣性あり／滑りすぎない（中間寄せ）
           enablePointerInteraction={true}
           animateIn={true}
           // ピン（points）
           pointsData={data}
-          pointLat={(d: GlobeDatum) => d.lat}
-          pointLng={(d: GlobeDatum) => d.lng}
-          pointColor={(d: GlobeDatum) => d.color}
+          pointLat={(d) => (d as GlobeDatum).lat}
+          pointLng={(d) => (d as GlobeDatum).lng}
+          pointColor={(d) => (d as GlobeDatum).color}
           pointAltitude={0.01}
           pointRadius={0.45}
           onPointHover={(d: unknown) => setHover((d as GlobeDatum) ?? null)}
