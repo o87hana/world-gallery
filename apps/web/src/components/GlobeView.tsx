@@ -223,17 +223,13 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           onPointClick={(d: unknown) => {
             const datum = d as GlobeDatum;
             const items = nearbyMap.get(datum.id) ?? [datum];
-            if (items.length > 1) {
-              setSelected({ primary: datum, items });
-              return;
-            }
-            router.push(`/${lang}/work/${datum.slug}`);
+            setSelected({ primary: datum, items });
           }}
         />
 
         {/* hoverカード */}
         {(selected ?? hover) && (
-          <div className="absolute left-4 bottom-4 w-[320px] rounded-2xl bg-white/95 shadow-xl p-4">
+          <div className="absolute left-4 bottom-4 w-[320px] max-h-[70vh] overflow-auto rounded-2xl bg-white/95 shadow-xl p-4">
             {selected && (
               <button
                 className="absolute right-3 top-3 text-sm text-black/50 hover:text-black"
