@@ -42,8 +42,9 @@ type Pin = {
   id: string;
   slug: string;
   category: string;
-  title_ja: string;
+  title_ja?: string;
   title_en?: string;
+  title?: string;
   location: { lat: number; lng: number; placeName_ja?: string; placeName_en?: string };
   coverImage?: SanityImageSource;
 };
@@ -93,7 +94,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
         lat: p.location.lat,
         lng: p.location.lng,
         color: CategoryColor[p.category] ?? "#ffffff",
-        title: lang === "ja" ? p.title_ja : p.title_en || "Coming soon",
+        title: lang === "ja" ? p.title_ja ?? p.title : p.title_en ?? p.title ?? "Coming soon",
         placeName: lang === "ja" ? p.location.placeName_ja : p.location.placeName_en,
         coverUrl: p.coverImage ? urlFor(p.coverImage).width(480).quality(70).url() : "",
       })),
@@ -251,18 +252,10 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
               />
             )}
             <div className="mt-3 text-sm text-black/60">{(selected ?? hover)!.primary.category}</div>
-            <div className="text-lg font-semibold">
-              {lang === "ja" ? (selected ?? hover)!.primary.title_ja : (selected ?? hover)!.primary.title_en || "Coming soon"}
-            </div>
-            {((lang === "ja"
-              ? (selected ?? hover)!.primary.location.placeName_ja
-              : (selected ?? hover)!.primary.location.placeName_en) ?? "") && (
-              <div className="text-sm text-black/70 mt-1">
-                {lang === "ja"
-                  ? (selected ?? hover)!.primary.location.placeName_ja
-                  : (selected ?? hover)!.primary.location.placeName_en}
-              </div>
-            )}
+            <div className="text-lg font-semibold">{(selected ?? hover)!.primary.title}</div>
+            {(selected ?? hover)!.primary.placeName ? (
+              <div className="text-sm text-black/70 mt-1">{(selected ?? hover)!.primary.placeName}</div>
+            ) : null}
             {(selected ?? hover)!.items.length === 1 ? (
               <button
                 className="mt-3 inline-flex items-center justify-center rounded-xl bg-[#0f1230] px-4 py-2 text-white text-sm"
@@ -280,7 +273,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
                       className="w-full rounded-xl border border-black/10 px-3 py-2 text-left text-sm hover:bg-black/5"
                       onClick={() => router.push(`/${lang}/work/${item.slug}`)}
                     >
-                      <div className="font-medium">{lang === "ja" ? item.title_ja : item.title_en || "Coming soon"}</div>
+                      <div className="font-medium">{item.title}</div>
                       {item.placeName && <div className="text-xs text-black/60">{item.placeName}</div>}
                     </button>
                   ))}

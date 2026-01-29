@@ -5,8 +5,9 @@ export const PINS_QUERY = /* groq */ `
   category,
   "title_ja": title_ja,
   "title_en": title_en,
+  title,
   location { lat, lng, placeName_ja, placeName_en },
-  coverImage
+  "coverImage": heroImage
 }
 `;
 
