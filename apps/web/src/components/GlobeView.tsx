@@ -94,7 +94,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
         lat: p.location.lat,
         lng: p.location.lng,
         color: CategoryColor[p.category] ?? "#ffffff",
-        title: lang === "ja" ? p.title_ja ?? p.title : p.title_en ?? p.title ?? "Coming soon",
+        title: lang === "ja" ? p.title_ja ?? p.title ?? "Coming soon" : p.title_en ?? p.title ?? "Coming soon",
         placeName: lang === "ja" ? p.location.placeName_ja : p.location.placeName_en,
         coverUrl: p.coverImage ? urlFor(p.coverImage).width(480).quality(70).url() : "",
       })),
