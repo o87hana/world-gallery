@@ -292,7 +292,9 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={item.coverUrl} alt="" className="h-40 w-full rounded-xl object-cover" />
                     ) : null}
-                    <div className={item.coverUrl ? "mt-2 font-medium" : "font-medium"}>{item.title}</div>
+                    <div className={item.coverUrl ? "mt-2 font-medium text-black/80" : "font-medium text-black/80"}>
+                      {item.title}
+                    </div>
                   </button>
                 ))}
               </div>
