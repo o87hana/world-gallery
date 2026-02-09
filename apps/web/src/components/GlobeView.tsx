@@ -245,7 +245,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
 
         {/* hoverカード */}
         {(selected ?? hover) && (
-          <div className="absolute left-4 bottom-4 w-[320px] max-h-[70vh] overflow-auto rounded-2xl bg-white/95 shadow-xl p-4">
+          <div className="absolute left-4 bottom-4 w-[480px] max-h-[90vh] overflow-auto rounded-2xl bg-white/95 shadow-xl p-6">
             {selected && (
               <button
                 className="absolute right-3 top-3 text-sm text-black/50 hover:text-black"
