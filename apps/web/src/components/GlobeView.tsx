@@ -280,6 +280,10 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
                       className="w-full rounded-xl border border-black/10 px-3 py-2 text-left text-sm hover:bg-black/5"
                       onClick={() => router.push(`/${lang}/work/${item.slug}`)}
                     >
+                      {item.coverUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={item.coverUrl} alt="" className="h-24 w-full rounded-lg object-cover" />
+                      ) : null}
                       <div className="font-medium">{item.title}</div>
                       {item.placeName && <div className="text-xs text-black/60">{item.placeName}</div>}
                     </button>
