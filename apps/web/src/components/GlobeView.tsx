@@ -248,7 +248,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           <div className="absolute left-4 bottom-4 w-[480px] max-h-[90vh] overflow-auto rounded-2xl bg-white/95 shadow-xl p-6">
             {selected && (
               <button
-                className="absolute right-3 top-3 text-sm text-black/50 hover:text-black"
+                className="absolute right-3 top-3 text-[1.35rem] leading-none text-black/50 hover:text-black"
                 onClick={() => {
                   setSelected(null);
                   setHover(null);
