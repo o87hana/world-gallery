@@ -118,8 +118,16 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           group.push(candidate);
         }
       }
-      group.sort((a, b) => getCreatedAtScore(b.createdAt) - getCreatedAtScore(a.createdAt));
-      map.set(base.id, group);
+      const uniqueById = new Map<string, GlobeDatum>();
+      for (const item of group) {
+        if (!uniqueById.has(item.id)) {
+          uniqueById.set(item.id, item);
+        }
+      }
+      const sorted = Array.from(uniqueById.values()).sort(
+        (a, b) => getCreatedAtScore(b.createdAt) - getCreatedAtScore(a.createdAt)
+      );
+      map.set(base.id, sorted);
     }
     return map;
   }, [data]);
@@ -250,45 +258,43 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
                 ×
               </button>
             )}
-            {(selected ?? hover)!.primary.coverImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={urlFor((selected ?? hover)!.primary.coverImage).width(640).quality(70).url()}
-                alt=""
-                className="h-40 w-full rounded-xl object-cover"
-              />
-            )}
-            <div className="mt-3 text-sm text-black/60">{(selected ?? hover)!.primary.category}</div>
-            <div className="text-lg font-semibold">{(selected ?? hover)!.primary.title}</div>
-            {(selected ?? hover)!.primary.placeName ? (
-              <div className="text-sm text-black/70 mt-1">{(selected ?? hover)!.primary.placeName}</div>
-            ) : null}
             {(selected ?? hover)!.items.length === 1 ? (
+              <>
+                {(selected ?? hover)!.primary.coverImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={urlFor((selected ?? hover)!.primary.coverImage).width(640).quality(70).url()}
+                    alt=""
+                    className="h-40 w-full rounded-xl object-cover"
+                  />
+                )}
+                <div className="mt-3 text-sm text-black/60">{(selected ?? hover)!.primary.category}</div>
+                <div className="text-lg font-semibold">{(selected ?? hover)!.primary.title}</div>
+                {(selected ?? hover)!.primary.placeName ? (
+                  <div className="text-sm text-black/70 mt-1">{(selected ?? hover)!.primary.placeName}</div>
+                ) : null}
               <button
                 className="mt-3 inline-flex items-center justify-center rounded-xl bg-[#0f1230] px-4 py-2 text-white text-sm"
                 onClick={() => router.push(`/${lang}/work/${(selected ?? hover)!.primary.slug}`)}
               >
                 Open
               </button>
+              </>
             ) : (
-              <div className="mt-3">
-                <div className="text-xs uppercase tracking-wide text-black/50">Latest</div>
-                <div className="mt-2 max-h-40 overflow-auto space-y-2">
-                  {(selected ?? hover)!.items.map((item) => (
-                    <button
-                      key={item.id}
-                      className="w-full rounded-xl border border-black/10 px-3 py-2 text-left text-sm hover:bg-black/5"
-                      onClick={() => router.push(`/${lang}/work/${item.slug}`)}
-                    >
-                      {item.coverUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.coverUrl} alt="" className="h-24 w-full rounded-lg object-cover" />
-                      ) : null}
-                      <div className="font-medium">{item.title}</div>
-                      {item.placeName && <div className="text-xs text-black/60">{item.placeName}</div>}
-                    </button>
-                  ))}
-                </div>
+              <div className="space-y-3">
+                {(selected ?? hover)!.items.map((item) => (
+                  <button
+                    key={item.id}
+                    className="w-full rounded-xl border border-black/10 px-3 py-2 text-left text-sm hover:bg-black/5"
+                    onClick={() => router.push(`/${lang}/work/${item.slug}`)}
+                  >
+                    {item.coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.coverUrl} alt="" className="h-40 w-full rounded-xl object-cover" />
+                    ) : null}
+                    <div className={item.coverUrl ? "mt-2 font-medium" : "font-medium"}>{item.title}</div>
+                  </button>
+                ))}
               </div>
             )}
           </div>
