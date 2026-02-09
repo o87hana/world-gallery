@@ -224,7 +224,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           pointLng={(d) => (d as GlobeDatum).lng}
           pointColor={(d) => (d as GlobeDatum).color}
           pointAltitude={0.01}
-          pointRadius={0.675}
+          pointRadius={0.75}
           onPointHover={(d: unknown) => {
             if (selected) return;
             const datum = d as GlobeDatum | null;
