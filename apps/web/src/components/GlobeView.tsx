@@ -45,6 +45,7 @@ type Pin = {
   title_ja?: string;
   title_en?: string;
   title?: string;
+  createdAt?: string;
   location: { lat: number; lng: number; placeName_ja?: string; placeName_en?: string };
   coverImage?: SanityImageSource;
 };
@@ -102,6 +103,11 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
   );
 
   const nearbyMap = useMemo(() => {
+    const getCreatedAtScore = (value?: string) => {
+      if (!value) return 0;
+      const time = new Date(value).getTime();
+      return Number.isFinite(time) ? time : 0;
+    };
     const map = new Map<string, GlobeDatum[]>();
     for (let i = 0; i < data.length; i += 1) {
       const base = data[i];
@@ -112,6 +118,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           group.push(candidate);
         }
       }
+      group.sort((a, b) => getCreatedAtScore(b.createdAt) - getCreatedAtScore(a.createdAt));
       map.set(base.id, group);
     }
     return map;
@@ -223,6 +230,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           onPointClick={(d: unknown) => {
             const datum = d as GlobeDatum;
             const items = nearbyMap.get(datum.id) ?? [datum];
+            setHover(null);
             setSelected({ primary: datum, items });
           }}
         />
@@ -233,7 +241,10 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
             {selected && (
               <button
                 className="absolute right-3 top-3 text-sm text-black/50 hover:text-black"
-                onClick={() => setSelected(null)}
+                onClick={() => {
+                  setSelected(null);
+                  setHover(null);
+                }}
                 aria-label="Close"
               >
                 ×
@@ -261,7 +272,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
               </button>
             ) : (
               <div className="mt-3">
-                <div className="text-xs uppercase tracking-wide text-black/50">Nearby</div>
+                <div className="text-xs uppercase tracking-wide text-black/50">Latest</div>
                 <div className="mt-2 max-h-40 overflow-auto space-y-2">
                   {(selected ?? hover)!.items.map((item) => (
                     <button

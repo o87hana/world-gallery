@@ -6,6 +6,7 @@ export const PINS_QUERY = /* groq */ `
   "title_ja": title_ja,
   "title_en": title_en,
   title,
+  createdAt,
   location { lat, lng, placeName_ja, placeName_en },
   "coverImage": heroImage
 }
