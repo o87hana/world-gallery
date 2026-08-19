@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { getServerSanityClient } from "@/lib/sanity.server";
 import { PINS_QUERY } from "@/lib/queries";
 import { GlobeView } from "@/components/GlobeView";
+import { createPageMetadata } from "@/lib/seo";
+import type { Lang } from "@/lib/i18n";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: Lang }> }): Promise<Metadata> {
+  const { lang } = await params;
+  return createPageMetadata({ lang });
+}
 
 export default async function TravelPage({ params }: { params: Promise<{ lang: "ja" | "en" }> }) {
   const { lang } = await params;

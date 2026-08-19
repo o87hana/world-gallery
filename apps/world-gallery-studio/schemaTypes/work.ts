@@ -1,6 +1,42 @@
 // schemaTypes/work.ts
 import {defineField, defineType} from 'sanity'
 
+export const textBlock = defineType({
+  name: 'textBlock',
+  title: 'Text',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'body_ja',
+      title: 'Body (Japanese)',
+      type: 'array',
+      of: [{type: 'block'}],
+    }),
+    defineField({
+      name: 'body_en',
+      title: 'Body (English)',
+      type: 'array',
+      of: [{type: 'block'}],
+    }),
+  ],
+  validation: (Rule) =>
+    Rule.custom((value) => {
+      const block = value as {body_ja?: unknown[]; body_en?: unknown[]} | undefined
+      return block?.body_ja?.length || block?.body_en?.length
+        ? true
+        : 'Enter body text in at least one language'
+    }),
+  preview: {
+    select: {bodyJa: 'body_ja', bodyEn: 'body_en'},
+    prepare({bodyJa, bodyEn}) {
+      const languages = [bodyJa?.length ? 'JA' : null, bodyEn?.length ? 'EN' : null]
+        .filter(Boolean)
+        .join(' / ')
+      return {title: 'Text', subtitle: languages || 'Empty'}
+    },
+  },
+})
+
 export const imageBlock = defineType({
   name: 'imageBlock',
   title: 'Image',
@@ -15,6 +51,17 @@ export const imageBlock = defineType({
         defineField({name: 'alt', title: 'Alt', type: 'string'}),
         defineField({name: 'caption', title: 'Caption', type: 'string'}),
       ],
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'caption_ja',
+      title: 'Caption (Japanese)',
+      type: 'string',
+    }),
+    defineField({
+      name: 'caption_en',
+      title: 'Caption (English)',
+      type: 'string',
     }),
     defineField({
       name: 'widthPreset',
@@ -29,6 +76,7 @@ export const imageBlock = defineType({
         layout: 'radio',
       },
       initialValue: 'full',
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {
@@ -57,10 +105,12 @@ export const imageGridBlock = defineType({
           fields: [
             defineField({name: 'alt', title: 'Alt', type: 'string'}),
             defineField({name: 'caption', title: 'Caption', type: 'string'}),
+            defineField({name: 'caption_ja', title: 'Caption (Japanese)', type: 'string'}),
+            defineField({name: 'caption_en', title: 'Caption (English)', type: 'string'}),
           ],
         }),
       ],
-      validation: (Rule) => Rule.min(1),
+      validation: (Rule) => Rule.required().min(2),
     }),
     defineField({
       name: 'columns',
@@ -76,6 +126,7 @@ export const imageGridBlock = defineType({
         layout: 'radio',
       },
       initialValue: 2,
+      validation: (Rule) => Rule.required().integer().min(1).max(4),
     }),
     defineField({
       name: 'gap',
@@ -90,6 +141,7 @@ export const imageGridBlock = defineType({
         layout: 'radio',
       },
       initialValue: 'medium',
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {
@@ -118,6 +170,7 @@ export const spacer = defineType({
         layout: 'radio',
       },
       initialValue: 'm',
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {
@@ -145,6 +198,7 @@ export const divider = defineType({
         layout: 'radio',
       },
       initialValue: 'solid',
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {
@@ -161,17 +215,35 @@ export const work = defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'title',
-      title: 'Title',
+      name: 'title_ja',
+      title: 'Title (Japanese)',
       type: 'string',
       validation: (Rule) => Rule.required().min(2).max(120),
+    }),
+    defineField({
+      name: 'title_en',
+      title: 'Title (English)',
+      type: 'string',
+      validation: (Rule) => Rule.max(120),
+    }),
+    defineField({
+      name: 'subtitle_ja',
+      title: 'Subtitle (Japanese)',
+      type: 'string',
+      validation: (Rule) => Rule.max(200),
+    }),
+    defineField({
+      name: 'subtitle_en',
+      title: 'Subtitle (English)',
+      type: 'string',
+      validation: (Rule) => Rule.max(200),
     }),
 
     defineField({
       name: 'slug',
       title: 'Slug (URL)',
       type: 'slug',
-      options: {source: 'title', maxLength: 96},
+      options: {source: 'title_ja', maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
 
@@ -181,11 +253,11 @@ export const work = defineType({
       type: 'string',
       options: {
         list: [
-          {title: 'Sketch', value: 'sketch'},
-          {title: 'Architecture', value: 'architecture'},
-          {title: 'Travel', value: 'travel'},
-          {title: 'Research', value: 'research'},
-          {title: 'Other', value: 'other'},
+          {title: 'Sketch', value: 'Sketch'},
+          {title: 'Architecture', value: 'Architecture'},
+          {title: 'Travel', value: 'Travel'},
+          {title: 'Research', value: 'Research'},
+          {title: 'Other', value: 'Other'},
         ],
         layout: 'radio',
       },
@@ -198,6 +270,7 @@ export const work = defineType({
       type: 'boolean',
       initialValue: true,
       description: 'OFFにすると非公開（プレビューのみ）',
+      validation: (Rule) => Rule.required(),
     }),
 
     defineField({
@@ -217,22 +290,67 @@ export const work = defineType({
           type: 'number',
           validation: (Rule) => Rule.required().min(-180).max(180),
         }),
+        defineField({
+          name: 'placeName_ja',
+          title: 'Place Name (Japanese)',
+          type: 'string',
+        }),
+        defineField({
+          name: 'placeName_en',
+          title: 'Place Name (English)',
+          type: 'string',
+        }),
       ],
+      validation: (Rule) => Rule.required(),
+    }),
+
+    defineField({
+      name: 'coverImage',
+      title: 'Cover Image',
+      type: 'image',
+      options: {hotspot: true},
+      validation: (Rule) => Rule.required(),
     }),
 
     defineField({
       name: 'heroImage',
-      title: 'Hero Image',
+      title: 'Hero Image (Legacy)',
       type: 'image',
       options: {hotspot: true},
+      description: '旧: 互換用（Cover Image を推奨）',
     }),
 
     defineField({
       name: 'blocks',
       title: 'Content Blocks',
       type: 'array',
-      of: [{type: 'block'}, {type: 'imageBlock'}, {type: 'imageGridBlock'}, {type: 'spacer'}, {type: 'divider'}],
+      of: [
+        {type: 'textBlock'},
+        {type: 'block'},
+        {type: 'imageBlock'},
+        {type: 'imageGridBlock'},
+        {type: 'spacer'},
+        {type: 'divider'},
+      ],
+      options: {sortable: true},
       description: 'テキスト/画像/グリッドを自由に並べて構成できます',
+      validation: (Rule) => Rule.required().min(1),
+    }),
+
+    defineField({
+      name: 'date',
+      title: 'Date',
+      type: 'datetime',
+      description: '作品の日付（表示・並び替え用）',
+    }),
+
+    defineField({
+      name: 'tags',
+      title: 'Tags',
+      type: 'array',
+      of: [{type: 'string', validation: (Rule) => Rule.min(1).max(60)}],
+      options: {layout: 'tags'},
+      validation: (Rule) => Rule.unique().max(20),
     }),
 
     defineField({
@@ -248,6 +366,8 @@ export const work = defineType({
           fields: [
             defineField({name: 'alt', title: 'Alt', type: 'string'}),
             defineField({name: 'caption', title: 'Caption', type: 'string'}),
+            defineField({name: 'caption_ja', title: 'Caption (Japanese)', type: 'string'}),
+            defineField({name: 'caption_en', title: 'Caption (English)', type: 'string'}),
           ],
         }),
       ],
@@ -257,32 +377,41 @@ export const work = defineType({
 
     defineField({
       name: 'body',
-      title: 'Text (about 500 words)',
+      title: 'Text (Legacy)',
       type: 'array',
       of: [{type: 'block'}],
       description: '旧: 互換用（Content Blocks を推奨）',
     }),
 
     defineField({
+      name: 'title',
+      title: 'Title (Legacy)',
+      type: 'string',
+      description: '旧: 互換用（Title (Japanese) / Title (English) を推奨）',
+    }),
+
+    defineField({
       name: 'createdAt',
-      title: 'Created At',
+      title: 'Created At (Legacy)',
       type: 'datetime',
       initialValue: () => new Date().toISOString(),
+      description: '旧: 互換用（Date を推奨）',
     }),
   ],
 
   preview: {
     select: {
-      title: 'title',
-      media: 'heroImage',
+      titleJa: 'title_ja',
+      titleLegacy: 'title',
+      media: 'coverImage',
+      legacyMedia: 'heroImage',
       category: 'category',
       published: 'published',
     },
-    prepare(selection) {
-      const {title, media, category, published} = selection as any
+    prepare({titleJa, titleLegacy, media, legacyMedia, category, published}) {
       return {
-        title,
-        media,
+        title: titleJa ?? titleLegacy ?? 'Untitled',
+        media: media ?? legacyMedia,
         subtitle: `${category ?? '—'} ${published ? '' : ' • (Unpublished)'}`,
       }
     },

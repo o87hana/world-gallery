@@ -1,4 +1,6 @@
-export const CategoryColor: Record<string, string> = {
+import type { WorkCategory } from "@/lib/work";
+
+export const CategoryColor: Record<WorkCategory, string> = {
   Sketch: "#E53935",
   Architecture: "#1E4E9E",
   Travel: "#F6C445",

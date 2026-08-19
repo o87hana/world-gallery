@@ -1,48 +1,46 @@
-import Link from "next/link";
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { GalleryExplorer, type GalleryCard } from "@/components/GalleryExplorer";
 import { getServerSanityClient } from "@/lib/sanity.server";
+import { urlFor } from "@/lib/sanity.client";
 import { GALLERY_QUERY } from "@/lib/queries";
+import { getDictionary, isLang } from "@/lib/i18n";
+import type { WorkCard } from "@/lib/work";
+import { createPageMetadata } from "@/lib/seo";
 
-type WorkCard = {
-  _id: string;
-  slug: string;
-  category: string;
-  title: string;
-  excerpt?: string;
-  heroUrl?: string;
-};
-
-export default async function GalleryPage({ params }: { params: Promise<{ lang: "ja" | "en" }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
+  if (!isLang(lang)) return {};
+  return createPageMetadata({
+    lang,
+    path: "/gallery",
+    title: "Gallery",
+    description: lang === "ja" ? "村上花の作品をカテゴリやタイトルから探せるギャラリーです。" : "Browse Hana Murakami's works by category or title.",
+  });
+}
+
+function GalleryFallback() {
+  return <div className="mt-8 h-64 animate-pulse rounded-xl bg-black/5" aria-hidden="true" />;
+}
+
+export default async function GalleryPage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  if (!isLang(lang)) notFound();
+
   const client = await getServerSanityClient();
   const works: WorkCard[] = await client.fetch(GALLERY_QUERY);
+  const cards: GalleryCard[] = works.map((work) => ({
+    ...work,
+    coverUrl: work.coverImage ? urlFor(work.coverImage).width(900).auto("format").url() : undefined,
+  }));
 
   return (
-    <section className="rounded-2xl bg-[#f6f2ea] p-8 shadow-lg text-[#0f1230]">
-      <h1 className="mb-8 text-3xl font-semibold">Gallery</h1>
-
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        {works.map((w) => (
-          <Link key={w._id} href={`/${lang}/work/${w.slug}`} className="group">
-            <div className="overflow-hidden rounded-2xl bg-white shadow-md">
-              {w.heroUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={w.heroUrl}
-                  alt={w.title}
-                  className="h-52 w-full object-cover transition group-hover:scale-[1.02]"
-                />
-              ) : (
-                <div className="h-52 w-full bg-[#e6e0d6]" />
-              )}
-              <div className="p-4">
-                <div className="text-xs text-black/60">{w.category}</div>
-                <div className="mt-1 text-lg font-semibold">{w.title}</div>
-                {w.excerpt ? <p className="mt-3 text-sm leading-6 text-black/70 line-clamp-3">{w.excerpt}</p> : null}
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+    <section className="rounded-2xl bg-[#f6f2ea] p-6 text-[#0f1230] shadow-lg sm:p-8">
+      <h1 className="mb-8 text-3xl font-semibold">{getDictionary(lang).gallery.title}</h1>
+      <Suspense fallback={<GalleryFallback />}>
+        <GalleryExplorer lang={lang} works={cards} />
+      </Suspense>
     </section>
   );
 }
+import type { Metadata } from "next";

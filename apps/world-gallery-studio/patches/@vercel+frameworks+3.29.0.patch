@@ -1,0 +1,12 @@
+diff --git a/node_modules/@vercel/frameworks/dist/read-config-file.js b/node_modules/@vercel/frameworks/dist/read-config-file.js
+--- a/node_modules/@vercel/frameworks/dist/read-config-file.js
++++ b/node_modules/@vercel/frameworks/dist/read-config-file.js
+@@ -61,7 +61,7 @@ async function readConfigFile(files) {
+       } else if (name.endsWith(".toml")) {
+         return (0, import_smol_toml.parse)(str);
+       } else if (name.endsWith(".yaml") || name.endsWith(".yml")) {
+-        return import_js_yaml.default.safeLoad(str, { filename: name });
++        return import_js_yaml.default.load(str, { filename: name });
+       }
+     }
+   }

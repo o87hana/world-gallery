@@ -1,26 +1,25 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import type { SanityImageSource } from "@sanity/image-url";
-import { AmbientLight, Color, DirectionalLight } from "three";
-import { CategoryColor } from "@/lib/colors";
-import { urlFor } from "@/lib/sanity.client";
+import type { GlobeMethods } from "react-globe.gl";
+import { AmbientLight, Color, DirectionalLight, type MeshPhongMaterial } from "three";
+import { createGlobeData, supportsWebGL, type GlobeDatum } from "@/lib/globe";
+import type { WorkPin } from "@/lib/work";
 
 const Globe = dynamic(
   async () => {
     if (typeof window === "undefined") return () => null;
 
-    const hasWebGPU = typeof (window as any).GPUShaderStage !== "undefined";
-    if (!hasWebGPU) {
-      // Fallback renderer for browsers without WebGPU
+    if (!supportsWebGL()) {
       return function GlobeUnsupported() {
         return (
           <div className="flex h-full w-full items-center justify-center text-center text-[#0f1230]">
             <div>
-              <p className="font-semibold">Globe view needs a WebGPU-capable browser.</p>
-              <p className="mt-2 text-sm text-black/60">Try Chrome / Edge or update your browser.</p>
+              <p className="font-semibold">Globe view needs a WebGL-capable browser.</p>
+              <p className="mt-2 text-sm text-black/60">Enable hardware acceleration or update your browser.</p>
             </div>
           </div>
         );
@@ -38,34 +37,19 @@ const Globe = dynamic(
   }
 );
 
-type Pin = {
-  id: string;
-  slug: string;
-  category: string;
-  title_ja?: string;
-  title_en?: string;
-  title?: string;
-  createdAt?: string;
-  location: { lat: number; lng: number; placeName_ja?: string; placeName_en?: string };
-  coverImage?: SanityImageSource;
-};
-
-type GlobeDatum = Pin & {
-  lat: number;
-  lng: number;
-  color: string;
-  title: string;
-  placeName?: string;
-  coverUrl?: string;
-};
-
 type HoverState = {
   primary: GlobeDatum;
   items: GlobeDatum[];
 };
 
+type GlobeHandle = GlobeMethods & {
+  globeMaterial(): MeshPhongMaterial;
+};
+
 const EARTH_RADIUS_KM = 6371;
 const POPUP_RANGE_KM = 100;
+const HOVER_DELAY_MS = 300;
+const COARSE_POINTER_QUERY = "(hover: none), (pointer: coarse)";
 const toRad = (deg: number) => (deg * Math.PI) / 180;
 const distanceKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
   const dLat = toRad(b.lat - a.lat);
@@ -78,32 +62,40 @@ const distanceKm = (a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
 };
 
-export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
+const subscribeToCoarsePointer = (callback: () => void) => {
+  const mediaQuery = window.matchMedia(COARSE_POINTER_QUERY);
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+};
+
+const getCoarsePointerSnapshot = () => window.matchMedia(COARSE_POINTER_QUERY).matches;
+const getServerCoarsePointerSnapshot = () => false;
+
+export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: WorkPin[] }) {
   const router = useRouter();
   const [hover, setHover] = useState<HoverState | null>(null);
   const [selected, setSelected] = useState<HoverState | null>(null);
+  const isCoarsePointer = useSyncExternalStore(
+    subscribeToCoarsePointer,
+    getCoarsePointerSnapshot,
+    getServerCoarsePointerSnapshot,
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const globeRef = useRef<any>(null);
+  const globeRef = useRef<GlobeHandle | undefined>(undefined);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const lightsAddedRef = useRef(false);
-  const hasWebGPU = typeof window !== "undefined" && typeof (window as any).GPUShaderStage !== "undefined";
+  const data = useMemo(() => createGlobeData(pins, lang), [pins, lang]);
 
-  const data = useMemo(
-    () =>
-      pins.map((p): GlobeDatum => ({
-        ...p,
-        lat: p.location.lat,
-        lng: p.location.lng,
-        color: CategoryColor[p.category] ?? "#ffffff",
-        title: lang === "ja" ? p.title_ja ?? p.title ?? "Coming soon" : p.title_en ?? p.title ?? "Coming soon",
-        placeName: lang === "ja" ? p.location.placeName_ja : p.location.placeName_en,
-        coverUrl: p.coverImage ? urlFor(p.coverImage).width(480).quality(70).url() : "",
-      })),
-    [pins, lang]
-  );
+  const clearHoverTimer = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
 
   const nearbyMap = useMemo(() => {
-    const getCreatedAtScore = (value?: string) => {
+    const getDateScore = (value?: string) => {
       if (!value) return 0;
       const time = new Date(value).getTime();
       return Number.isFinite(time) ? time : 0;
@@ -125,12 +117,14 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
         }
       }
       const sorted = Array.from(uniqueById.values()).sort(
-        (a, b) => getCreatedAtScore(b.createdAt) - getCreatedAtScore(a.createdAt)
+        (a, b) => getDateScore(b.date) - getDateScore(a.date)
       );
       map.set(base.id, sorted);
     }
     return map;
   }, [data]);
+
+  useEffect(() => () => clearHoverTimer(), []);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -164,7 +158,7 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
   }, []);
 
   useEffect(() => {
-    if (!hasWebGPU) return;
+    if (!supportsWebGL()) return;
     let frameId = 0;
 
     const applyLighting = () => {
@@ -185,6 +179,14 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
       const material = globe.globeMaterial?.();
       if (!material) return false;
 
+      const controls = globe.controls?.();
+      if (controls) {
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.rotateSpeed = 0.55;
+        controls.zoomSpeed = 0.8;
+      }
+
       material.color = new Color("#ffffff");
       material.emissive = new Color("#ffffff");
       material.emissiveMap = material.map ?? null;
@@ -203,15 +205,30 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
     return () => {
       if (frameId) window.cancelAnimationFrame(frameId);
     };
-  }, [hasWebGPU]);
+  }, []);
+
+  const popup = selected ?? hover;
+
+  if (data.length === 0) {
+    return (
+      <div className="flex h-full w-full items-center justify-center px-6 text-center text-[#f6f2ea]" role="status">
+        <div>
+          <p className="font-semibold">{lang === "ja" ? "表示できる作品がありません" : "No works are available"}</p>
+          <p className="mt-2 text-sm text-white/70">
+            {lang === "ja" ? "公開作品が追加されると、ここに表示されます。" : "Published works will appear here."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div ref={containerRef} className="relative h-full w-full overflow-hidden">
         <Globe
-          {...(hasWebGPU ? { ref: globeRef } : {})}
-          globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
+          ref={globeRef}
+          globeImageUrl="/textures/earth-blue-marble.jpg"
+          bumpImageUrl="/textures/earth-topology.png"
           backgroundColor="rgba(0,0,0,0)"
           width={size.width || undefined}
           height={size.height || undefined}
@@ -226,71 +243,97 @@ export function GlobeView({ lang, pins }: { lang: "ja" | "en"; pins: Pin[] }) {
           pointAltitude={0.01}
           pointRadius={0.75}
           onPointHover={(d: unknown) => {
-            if (selected) return;
+            if (isCoarsePointer || selected) return;
+            clearHoverTimer();
             const datum = d as GlobeDatum | null;
             if (!datum) {
               setHover(null);
               return;
             }
-            const items = nearbyMap.get(datum.id) ?? [datum];
-            setHover({ primary: datum, items });
+            hoverTimerRef.current = setTimeout(() => {
+              const items = nearbyMap.get(datum.id) ?? [datum];
+              setHover({ primary: datum, items });
+              hoverTimerRef.current = null;
+            }, HOVER_DELAY_MS);
           }}
           onPointClick={(d: unknown) => {
             const datum = d as GlobeDatum;
-            const items = nearbyMap.get(datum.id) ?? [datum];
+            clearHoverTimer();
             setHover(null);
+
+            if (!isCoarsePointer || selected?.primary.id === datum.id) {
+              router.push(`/${lang}/work/${datum.slug}`);
+              return;
+            }
+
+            const items = nearbyMap.get(datum.id) ?? [datum];
             setSelected({ primary: datum, items });
           }}
         />
 
         {/* hoverカード */}
-        {(selected ?? hover) && (
-          <div className="absolute left-4 bottom-4 w-[480px] max-h-[90vh] overflow-auto rounded-2xl bg-white/95 shadow-xl p-6">
+        {popup && (
+          <div
+            className="absolute inset-x-4 bottom-4 max-h-[calc(100%-2rem)] overflow-auto rounded-2xl bg-white/95 p-4 shadow-xl sm:right-auto sm:w-[min(480px,calc(100%-2rem))] sm:p-6"
+            role={selected ? "dialog" : "status"}
+            aria-label={selected ? (lang === "ja" ? "作品情報" : "Work details") : undefined}
+          >
             {selected && (
               <button
-                className="absolute right-3 top-3 text-[1.35rem] leading-none text-black/50 hover:text-black"
+                className="absolute right-3 top-3 rounded-sm text-[1.35rem] leading-none text-black/50 hover:text-black"
                 onClick={() => {
+                  clearHoverTimer();
                   setSelected(null);
                   setHover(null);
                 }}
-                aria-label="Close"
+                aria-label={lang === "ja" ? "閉じる" : "Close"}
               >
                 ×
               </button>
             )}
-            {(selected ?? hover)!.items.length === 1 ? (
+            {popup.items.length === 1 ? (
               <>
-                {(selected ?? hover)!.primary.coverImage && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={urlFor((selected ?? hover)!.primary.coverImage).width(640).quality(70).url()}
-                    alt=""
-                    className="h-40 w-full rounded-xl object-cover"
-                  />
+                {popup.primary.coverUrl && (
+                  <div className="relative h-40 w-full overflow-hidden rounded-xl">
+                    <Image
+                      src={popup.primary.coverUrl}
+                      alt=""
+                      fill
+                      sizes="(max-width: 639px) calc(100vw - 4rem), 432px"
+                      className="object-cover"
+                    />
+                  </div>
                 )}
-                <div className="mt-3 text-sm text-black/60">{(selected ?? hover)!.primary.category}</div>
-                <div className="text-lg font-semibold">{(selected ?? hover)!.primary.title}</div>
-                {(selected ?? hover)!.primary.placeName ? (
-                  <div className="text-sm text-black/70 mt-1">{(selected ?? hover)!.primary.placeName}</div>
+                <div className="mt-3 text-sm text-black/60">{popup.primary.category}</div>
+                <div className="text-lg font-semibold">{popup.primary.title}</div>
+                {popup.primary.placeName ? (
+                  <div className="mt-1 text-sm text-black/70">{popup.primary.placeName}</div>
                 ) : null}
               <button
-                className="mt-3 inline-flex items-center justify-center rounded-xl bg-[#0f1230] px-4 py-2 text-white text-sm"
-                onClick={() => router.push(`/${lang}/work/${(selected ?? hover)!.primary.slug}`)}
+                className="mt-3 inline-flex items-center justify-center rounded-xl bg-[#0f1230] px-4 py-2 text-sm text-white"
+                onClick={() => router.push(`/${lang}/work/${popup.primary.slug}`)}
               >
-                Open
+                {lang === "ja" ? "作品を見る" : "Open work"}
               </button>
               </>
             ) : (
               <div className="space-y-3">
-                {(selected ?? hover)!.items.map((item) => (
+                {popup.items.map((item) => (
                   <button
                     key={item.id}
                     className="w-full rounded-xl border border-black/10 px-3 py-2 text-left text-sm hover:bg-black/5"
                     onClick={() => router.push(`/${lang}/work/${item.slug}`)}
                   >
                     {item.coverUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.coverUrl} alt="" className="h-40 w-full rounded-xl object-cover" />
+                      <span className="relative block h-40 w-full overflow-hidden rounded-xl">
+                        <Image
+                          src={item.coverUrl}
+                          alt=""
+                          fill
+                          sizes="(max-width: 639px) calc(100vw - 4rem), 432px"
+                          className="object-cover"
+                        />
+                      </span>
                     ) : null}
                     <div className={item.coverUrl ? "mt-2 font-medium text-black/80" : "font-medium text-black/80"}>
                       {item.title}
