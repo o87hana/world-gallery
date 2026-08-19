@@ -7,7 +7,7 @@
 ## 1. 利用する画面
 
 - 公開サイト: [https://world-gallery-studio.vercel.app/](https://world-gallery-studio.vercel.app/)
-- 管理画面（Sanity Studio）: `クライアント配布時にURLを記入`
+- 管理画面（Sanity Studio）: [https://world-gallery-studio.sanity.studio/](https://world-gallery-studio.sanity.studio/)
 - SanityプロジェクトID: `kmx5m7v5`
 - Dataset: `production`
 
@@ -240,9 +240,8 @@ Sanityには、次の2つの状態があります。
 
 ## 11. 管理者が配布前に記入する情報
 
-- Sanity Studio URL: `____________________________`
+- Sanity Studio URL: `https://world-gallery-studio.sanity.studio/`
 - 招待を送る管理者: `____________________________`
 - 問い合わせ先: `____________________________`
 - Previewリンクの受け渡し方法: `____________________________`
 - 公開承認者: `____________________________`
-

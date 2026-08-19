@@ -28,6 +28,8 @@ Hana Murakamiさんの作品を「場所」と結び付け、3D地球儀とGalle
 
 公開サイト: [https://world-gallery-studio.vercel.app/](https://world-gallery-studio.vercel.app/)
 
+Sanity Studio: [https://world-gallery-studio.sanity.studio/](https://world-gallery-studio.sanity.studio/)
+
 ## 3. 会議での推奨デモ順
 
 1. 日本語トップで地球儀を操作する
@@ -54,7 +56,7 @@ Hana Murakamiさんの作品を「場所」と結び付け、3D地球儀とGalle
 - 非公開作品のPreviewリンクを渡す方法
 - Contactメールの受信担当者
 - 作品削除前の確認・バックアップ手順
-- Sanity Studio管理画面URLの正式な配布先
+- Sanity Studio管理画面URLの配布対象
 
 ## 5. 公開運用の推奨フロー
 
@@ -70,8 +72,7 @@ Hana Murakamiさんの作品を「場所」と結び付け、3D地球儀とGalle
 
 ## 6. 現在の確認・設定待ち
 
-- Sanity Studioの正式な公開URL
-- Sanity App IDとStudio内Preview連携
+- Studio内Preview連携
 - 編集者アカウントの招待と権限
 - Editor権限のAPIトークン失効とViewerトークンへの最小権限化
 - 本番Contactメールの実送信確認
@@ -102,4 +103,3 @@ Hana Murakamiさんの作品を「場所」と結び付け、3D地球儀とGalle
 | Contact受信者 |  |  |  |
 | Preview共有方法 |  |  |  |
 | 公開予定日 |  |  |  |
-
