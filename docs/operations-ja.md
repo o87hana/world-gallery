@@ -75,7 +75,23 @@ Studio公開後、ログイン、Work一覧、既存作品の編集画面が開�
 
 公開データは1時間ごとに自動再検証されます。再検証中にSanity取得が失敗した場合は直前の成功データが維持され、キャッシュがない初回取得の失敗はWebのerror UIに表示されます。Preview Modeはキャッシュを使用しません。
 
-Webhookによる即時再検証は未実装です。即時かつ確実に反映する必要がある場合はWebを再デプロイしてください。TASK-031〜032完了後に、この暫定手順をWebhook自動反映へ更新します。
+Webhook受信APIは`POST /api/revalidate`に実装済みです。本番Webhookの接続が完了するまでは、即時かつ確実に反映する必要がある場合はWebを再デプロイしてください。
+
+TASK-032ではSanity Manageの`API > Webhooks`に次の1件を作成します。受信APIが本番へデプロイされる前に有効化しません。
+
+| 項目 | 設定値 |
+|---|---|
+| Name | `World Gallery cache revalidation` |
+| URL | `https://world-gallery-studio.vercel.app/api/revalidate` |
+| Dataset | `production` |
+| Trigger on | Create / Update / Delete |
+| Filter | `_type == "work"` |
+| Projection | `{ "_type": coalesce(after()._type, before()._type), "slug": coalesce(after().slug.current, before().slug.current) }` |
+| HTTP method | `POST` |
+| Drafts / Versions | どちらもOFF |
+| Secret | Vercelの`SANITY_REVALIDATE_SECRET`と同じ値 |
+
+Secretは本文に含めず、Sanityが付与する署名を受信APIで検証します。秘密値をログ、Issue、資料へ記載しません。
 
 ## 6. Preview確認
 

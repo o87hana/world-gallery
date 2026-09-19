@@ -72,6 +72,7 @@ npm run dev
 | `NEXT_PUBLIC_SANITY_API_VERSION` | ブラウザ公開 | Sanity APIバージョン | 常時 |
 | `SANITY_API_READ_TOKEN` | サーバー秘密 | Draftを読むViewerトークン | Preview |
 | `PREVIEW_SECRET` | サーバー秘密 | Preview開始URLの認証 | Preview |
+| `SANITY_REVALIDATE_SECRET` | サーバー秘密 | Sanity Webhookの署名検証 | Webhook再検証 |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | ブラウザ公開 | Turnstileウィジェット | Contact |
 | `TURNSTILE_SECRET_KEY` | サーバー秘密 | Turnstile検証 | Contact |
 | `RESEND_API_KEY` | サーバー秘密 | メール送信 | Contact |
@@ -123,7 +124,7 @@ Preview開始URLは次の形式です。
 
 公開データはSanity CDNとNext.js Data Cacheを使用し、地球儀、Gallery、作品詳細、sitemapごとのタグを付けて1時間ごとに再検証します。Preview Modeはキャッシュを使わず、常にSanityのDrafts APIから取得します。再検証中の取得失敗では直前の成功データを維持し、初回取得自体が失敗した場合は各言語ルートのerror UIで扱います。
 
-Sanity Webhookによる即時再検証はまだ実装前です。通常は公開後おおむね1時間以内に自動更新されますが、即時かつ確実に反映する必要がある場合はWebを再デプロイしてください。Webhook自動反映はTASK-031〜032で対応予定です。
+Sanity Webhookの受信APIは`POST /api/revalidate`に実装済みです。本番Webhookの接続が完了するまでは、通常は公開後おおむね1時間以内に自動更新されます。即時かつ確実に反映する必要がある場合はWebを再デプロイしてください。本番接続と実動作確認はTASK-032で行います。
 
 ## デプロイと復旧
 

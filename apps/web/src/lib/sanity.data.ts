@@ -7,15 +7,8 @@ import {
   SITEMAP_WORKS_QUERY,
 } from "@/lib/queries";
 import { getPublicSanityClient, getServerSanityContext } from "@/lib/sanity.server";
+import { SANITY_CACHE_TAGS } from "@/lib/sanity.cache";
 import type { WorkCard, WorkDetail, WorkPin } from "@/lib/work";
-
-export const SANITY_CACHE_TAGS = {
-  works: "sanity:works",
-  pins: "sanity:pins",
-  gallery: "sanity:gallery",
-  sitemap: "sanity:sitemap",
-  work: (slug: string) => `sanity:work:${slug}`,
-} as const;
 
 const SANITY_REVALIDATE_SECONDS = 60 * 60;
 

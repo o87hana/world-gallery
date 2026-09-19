@@ -7,6 +7,7 @@ import {
   PUBLIC_WORK_BY_SLUG_QUERY,
   SITEMAP_WORKS_QUERY,
 } from "./queries";
+import { SANITY_CACHE_TAGS } from "./sanity.cache";
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
@@ -24,7 +25,6 @@ import {
   getSanityPins,
   getSanitySitemapWorks,
   getSanityWork,
-  SANITY_CACHE_TAGS,
 } from "./sanity.data";
 
 describe("Sanity data cache policy", () => {
