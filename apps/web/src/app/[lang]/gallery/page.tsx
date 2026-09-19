@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { GalleryExplorer, type GalleryCard } from "@/components/GalleryExplorer";
-import { getServerSanityClient } from "@/lib/sanity.server";
+import { getSanityGalleryWorks } from "@/lib/sanity.data";
 import { urlFor } from "@/lib/sanity.client";
-import { GALLERY_QUERY } from "@/lib/queries";
 import { getDictionary, isLang } from "@/lib/i18n";
 import type { WorkCard } from "@/lib/work";
 import { createPageMetadata } from "@/lib/seo";
@@ -27,8 +26,7 @@ export default async function GalleryPage({ params }: { params: Promise<{ lang: 
   const { lang } = await params;
   if (!isLang(lang)) notFound();
 
-  const client = await getServerSanityClient();
-  const works: WorkCard[] = await client.fetch(GALLERY_QUERY);
+  const works: WorkCard[] = await getSanityGalleryWorks();
   const cards: GalleryCard[] = works.map((work) => ({
     ...work,
     coverUrl: work.coverImage ? urlFor(work.coverImage).width(900).auto("format").url() : undefined,

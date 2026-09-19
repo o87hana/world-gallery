@@ -1,18 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { PREVIEW_WORK_BY_SLUG_QUERY, PUBLIC_WORK_BY_SLUG_QUERY } from "@/lib/queries";
-
 const mocks = vi.hoisted(() => ({
-  fetch: vi.fn(),
-  getServerSanityContext: vi.fn(),
+  getSanityWork: vi.fn(),
   notFound: vi.fn(() => {
     throw new Error("NEXT_NOT_FOUND");
   }),
 }));
 
 vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
-vi.mock("@/lib/sanity.server", () => ({ getServerSanityContext: mocks.getServerSanityContext }));
+vi.mock("@/lib/sanity.data", () => ({ getSanityWork: mocks.getSanityWork }));
 vi.mock("@/lib/sanity.client", () => ({
   urlFor: vi.fn(() => ({
     width: vi.fn().mockReturnThis(),
@@ -25,13 +22,8 @@ import WorkPage from "./page";
 
 describe("WorkPage public access", () => {
   beforeEach(() => {
-    mocks.fetch.mockReset();
-    mocks.getServerSanityContext.mockReset();
+    mocks.getSanityWork.mockReset();
     mocks.notFound.mockClear();
-    mocks.getServerSanityContext.mockResolvedValue({
-      client: { fetch: mocks.fetch },
-      isDraft: false,
-    });
   });
 
   it("returns not found when an unpublished slug is absent from the public query", async () => {
@@ -44,21 +36,17 @@ describe("WorkPage public access", () => {
       published: false,
     };
 
-    mocks.fetch.mockImplementation(async (query: string) =>
-      query === PUBLIC_WORK_BY_SLUG_QUERY ? null : unpublishedFixture,
-    );
+    mocks.getSanityWork.mockResolvedValue(null);
 
     await expect(
       WorkPage({ params: Promise.resolve({ lang: "ja", slug: unpublishedFixture.slug }) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
-    expect(mocks.fetch).toHaveBeenCalledWith(PUBLIC_WORK_BY_SLUG_QUERY, {
-      slug: unpublishedFixture.slug,
-    });
+    expect(mocks.getSanityWork).toHaveBeenCalledWith(unpublishedFixture.slug);
     expect(mocks.notFound).toHaveBeenCalledOnce();
   });
 
-  it("uses the separate preview query when draft mode is enabled", async () => {
+  it("renders an unpublished work returned by the Preview-aware data loader", async () => {
     const unpublishedFixture = {
       _id: "unpublished-work",
       slug: "secret-work",
@@ -68,22 +56,16 @@ describe("WorkPage public access", () => {
       published: false,
     };
 
-    mocks.getServerSanityContext.mockResolvedValue({
-      client: { fetch: mocks.fetch },
-      isDraft: true,
-    });
-    mocks.fetch.mockResolvedValue(unpublishedFixture);
+    mocks.getSanityWork.mockResolvedValue(unpublishedFixture);
 
     await WorkPage({ params: Promise.resolve({ lang: "ja", slug: unpublishedFixture.slug }) });
 
-    expect(mocks.fetch).toHaveBeenCalledWith(PREVIEW_WORK_BY_SLUG_QUERY, {
-      slug: unpublishedFixture.slug,
-    });
+    expect(mocks.getSanityWork).toHaveBeenCalledWith(unpublishedFixture.slug);
     expect(mocks.notFound).not.toHaveBeenCalled();
   });
 
   it("renders indexed Japanese fallback content when English is missing", async () => {
-    mocks.fetch.mockResolvedValue({
+    mocks.getSanityWork.mockResolvedValue({
       id: "localized-work",
       slug: "localized-work",
       title_ja: "日本語タイトル",

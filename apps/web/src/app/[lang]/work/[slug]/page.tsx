@@ -3,18 +3,14 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { WorkContent } from "@/components/WorkContent";
 import { SanityImage } from "@/components/SanityImage";
-import { getServerSanityContext } from "@/lib/sanity.server";
+import { getSanityWork } from "@/lib/sanity.data";
 import { urlFor } from "@/lib/sanity.client";
-import { PREVIEW_WORK_BY_SLUG_QUERY, PUBLIC_WORK_BY_SLUG_QUERY } from "@/lib/queries";
 import { isLang } from "@/lib/i18n";
-import { localizedOptionalValue, localizedValue, type WorkDetail } from "@/lib/work";
+import { localizedOptionalValue, localizedValue } from "@/lib/work";
 import { createPageMetadata } from "@/lib/seo";
 
 const getWork = cache(async (slug: string) => {
-  const { client, isDraft } = await getServerSanityContext();
-  const query = isDraft ? PREVIEW_WORK_BY_SLUG_QUERY : PUBLIC_WORK_BY_SLUG_QUERY;
-  const work: WorkDetail | null = await client.fetch(query, { slug });
-  return work;
+  return getSanityWork(slug);
 });
 
 export async function generateMetadata({

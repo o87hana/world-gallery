@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getPublicSanityClient } from "@/lib/sanity.server";
-import { PINS_QUERY } from "@/lib/queries";
+import { getSanitySitemapWorks } from "@/lib/sanity.data";
 import { LANGUAGES } from "@/lib/i18n";
 import { SITE_URL } from "@/lib/seo";
 import type { WorkPin } from "@/lib/work";
@@ -20,8 +19,7 @@ function languages(path: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const client = getPublicSanityClient();
-  const works: WorkPin[] = await client.fetch(PINS_QUERY);
+  const works: WorkPin[] = await getSanitySitemapWorks();
 
   const staticEntries: MetadataRoute.Sitemap = LANGUAGES.flatMap((lang) =>
     STATIC_PATHS.map((path) => ({

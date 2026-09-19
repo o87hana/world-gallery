@@ -1,6 +1,6 @@
 # World Gallery クライアント会議資料
 
-最終更新: 2026-08-20
+最終更新: 2026-09-19
 
 ## 1. プロジェクトの目的
 
@@ -76,6 +76,7 @@ Sanity Studio: [https://world-gallery-studio.sanity.studio/](https://world-galle
 - 編集者アカウントの招待と権限
 - Editor権限のAPIトークン失効とViewerトークンへの最小権限化
 - 本番Contactメールの実送信確認
+- Sanity公開変更のWebhook自動反映
 - Vercel／Sanity／Resendを含む最終本番受け入れ
 
 これらは作品編集機能そのものとは分けて管理し、認証情報を会議資料へ記載しません。

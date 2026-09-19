@@ -27,6 +27,15 @@ export const GALLERY_QUERY = /* groq */ `
 }
 `;
 
+export const SITEMAP_WORKS_QUERY = /* groq */ `
+*[${PUBLIC_WORK_FILTER}] | order(date desc) {
+  "id": _id,
+  "slug": slug.current,
+  date,
+  "coverUrl": coverImage.asset->url
+}
+`;
+
 const workBySlugProjection = /* groq */ `{
   "id": _id,
   "slug": slug.current,

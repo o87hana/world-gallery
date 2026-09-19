@@ -5,6 +5,7 @@ import {
   PINS_QUERY,
   PREVIEW_WORK_BY_SLUG_QUERY,
   PUBLIC_WORK_BY_SLUG_QUERY,
+  SITEMAP_WORKS_QUERY,
 } from "./queries";
 import { localizedValue, WORK_CATEGORIES } from "./work";
 
@@ -14,6 +15,7 @@ describe("public work queries", () => {
   it.each([
     ["pins", PINS_QUERY],
     ["gallery", GALLERY_QUERY],
+    ["sitemap", SITEMAP_WORKS_QUERY],
     ["work detail", PUBLIC_WORK_BY_SLUG_QUERY],
   ])("requires published works for %s", (_name, query) => {
     expect(query).toMatch(publishedFilter);
@@ -42,6 +44,12 @@ describe("public work queries", () => {
     expect(PUBLIC_WORK_BY_SLUG_QUERY).toContain("placeName_ja");
     expect(PUBLIC_WORK_BY_SLUG_QUERY).toContain("placeName_en");
     expect(PUBLIC_WORK_BY_SLUG_QUERY).toContain("blocks[]");
+  });
+
+  it("keeps the sitemap projection limited to routing metadata", () => {
+    expect(SITEMAP_WORKS_QUERY).toContain('"slug": slug.current');
+    expect(SITEMAP_WORKS_QUERY).toContain('"coverUrl": coverImage.asset->url');
+    expect(SITEMAP_WORKS_QUERY).not.toContain("blocks[]");
   });
 });
 

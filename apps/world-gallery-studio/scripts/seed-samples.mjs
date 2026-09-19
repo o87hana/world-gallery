@@ -10,7 +10,9 @@ const PROJECT_ID = 'kmx5m7v5'
 const DATASET = 'production'
 const API_VERSION = '2025-12-19'
 const SAMPLE_IMAGE_FILENAME = 'world-gallery-sample.avif'
-const SAMPLE_IMAGE_PATH = fileURLToPath(new URL('../../../designerphoto.avif', import.meta.url))
+const SAMPLE_IMAGE_PATH = fileURLToPath(
+  new URL('../../web/public/designerphoto.avif', import.meta.url),
+)
 const shouldWrite = process.argv.includes('--write')
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
