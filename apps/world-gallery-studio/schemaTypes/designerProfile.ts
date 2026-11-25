@@ -12,14 +12,26 @@ const timelineEntry = defineType({
   preview: {select: {title: 'year', subtitle: 'text_en'}},
 })
 
+const featuredItem = defineType({
+  name: 'designerFeaturedItem',
+  title: 'Featured item',
+  type: 'object',
+  fields: [
+    defineField({name: 'title_ja', title: 'Title (Japanese)', type: 'string'}),
+    defineField({name: 'title_en', title: 'Title (English)', type: 'string'}),
+    defineField({name: 'url', title: 'Link URL', type: 'url', validation: (Rule) => Rule.uri({scheme: ['http', 'https']})}),
+  ],
+  preview: {select: {title: 'title_en', subtitle: 'url'}},
+})
+
 const featuredEntry = defineType({
   name: 'designerFeaturedEntry',
   title: 'Featured entry',
   type: 'object',
   fields: [
     defineField({name: 'year', title: 'Year', type: 'string', validation: (Rule) => Rule.required()}),
-    defineField({name: 'items_ja', title: 'Items (Japanese)', type: 'array', of: [{type: 'string'}]}),
-    defineField({name: 'items_en', title: 'Items (English)', type: 'array', of: [{type: 'string'}]}),
+    defineField({name: 'items_ja', title: 'Items (Japanese)', type: 'array', of: [{type: 'designerFeaturedItem'}]}),
+    defineField({name: 'items_en', title: 'Items (English)', type: 'array', of: [{type: 'designerFeaturedItem'}]}),
   ],
   preview: {select: {title: 'year'}},
 })
@@ -67,51 +79,26 @@ export const designerProfile = defineType({
     role_ja: 'デザイナー', role_en: 'Designer',
     name_ja: 'Hana Murakami（村上 花）', name_en: 'Hana Murakami（村上 花）',
     timeline: [
-      {year: '2000', text_ja: '日本生まれ', text_en: 'Born in Japan'},
-      {year: '2018', text_ja: '留学生としてオーストラリアへ移住', text_en: 'Moved to Australia as an international student'},
-      {year: '2019', text_ja: 'メルボルン大学 Bachelor of Designにて、建築学を専攻', text_en: 'Began studying architecture at the University of Melbourne, completing a Bachelor of Design with a major in Architecture'},
-      {year: '2023', text_ja: '同大学を卒業。すべての建築設計スタジオ科目でFirst Class Honours（H1）を取得', text_en: 'Graduated from the University of Melbourne with First Class Honours (H1) in every architecture studio subject'},
+      {year: '2000', text_ja: '日本生まれ。', text_en: 'Born in Japan.'},
+      {year: '2018', text_ja: '留学生としてオーストラリアへ移住。', text_en: 'Moved to Australia as an international student.'},
+      {year: '2019–2023', text_ja: 'メルボルン大学で建築学を専攻し、Bachelor of Designを修了。すべての建築設計スタジオ科目でFirst Class Honours（H1）を取得。', text_en: 'Studied at the University of Melbourne, completing a Bachelor of Design with a major in Architecture. Achieved First Class Honours (H1) results in every architecture studio subject.'},
+      {year: '2024–', text_ja: 'ロンドンのPitman Tozer ArchitectsでArchitectural Assistantとして勤務開始。', text_en: 'Began working as an Architectural Assistant at Pitman Tozer Architects in London.'},
     ],
     featured_heading_ja: '主な選出歴', featured_heading_en: 'Featured',
     featured: [
-      {year: '2020', items_ja: ['MSDx Summer (FoDR)'], items_en: ['MSDx Summer (FoDR)']},
-      {year: '2021', items_ja: ['MSDx Winter (Design Studio Alpha)', 'MSDx Summer (Design Studio Beta)'], items_en: ['MSDx Winter (Design Studio Alpha)', 'MSDx Summer (Design Studio Beta)']},
-      {year: '2022', items_ja: ['MSDx Winter (Design Studio Gamma, Digital Design)', 'MSDx Summer (Design Studio Delta)'], items_en: ['MSDx Winter (Design Studio Gamma, Digital Design)', 'MSDx Summer (Design Studio Delta)']},
+      {year: '2020', items_ja: [{title_ja: 'MSDx Summer (FoDR)', title_en: 'MSDx Summer (FoDR)'}], items_en: [{title_ja: 'MSDx Summer (FoDR)', title_en: 'MSDx Summer (FoDR)'}]},
+      {year: '2021', items_ja: [{title_ja: 'MSDx Winter (Design Studio Alpha)', title_en: 'MSDx Winter (Design Studio Alpha)'}, {title_ja: 'MSDx Summer (Design Studio Beta)', title_en: 'MSDx Summer (Design Studio Beta)'}], items_en: [{title_ja: 'MSDx Winter (Design Studio Alpha)', title_en: 'MSDx Winter (Design Studio Alpha)'}, {title_ja: 'MSDx Summer (Design Studio Beta)', title_en: 'MSDx Summer (Design Studio Beta)'}]},
+      {year: '2022', items_ja: [{title_ja: 'MSDx Winter (Design Studio Gamma, Digital Design)', title_en: 'MSDx Winter (Design Studio Gamma, Digital Design)'}, {title_ja: 'MSDx Summer (Design Studio Delta)', title_en: 'MSDx Summer (Design Studio Delta)'}], items_en: [{title_ja: 'MSDx Winter (Design Studio Gamma, Digital Design)', title_en: 'MSDx Winter (Design Studio Gamma, Digital Design)'}, {title_ja: 'MSDx Summer (Design Studio Delta)', title_en: 'MSDx Summer (Design Studio Delta)'}]},
+      {year: '2026', items_ja: [{title_ja: 'スケッチがArchitects’ Journalに掲載', title_en: 'Sketch featured in Architects’ journal', url: 'https://www.architectsjournal.co.uk/news/sketchbook-hana-murakami'}], items_en: [{title_ja: 'スケッチがArchitects’ Journalに掲載', title_en: 'Sketch featured in Architects’ journal', url: 'https://www.architectsjournal.co.uk/news/sketchbook-hana-murakami'}]},
     ],
     skills_heading_ja: 'スキル', skills_heading_en: 'Skills',
-    skills: [
-      {experience_ja: '3年以上', experience_en: '3+ years', items_ja: ['Rhinoceros', 'Adobe InDesign', 'Adobe Illustrator', 'Adobe Photoshop', 'Google Sheets', 'Microsoft Office (Word, Excel, PowerPoint)', 'Wix'], items_en: ['Rhinoceros', 'Adobe InDesign', 'Adobe Illustrator', 'Adobe Photoshop', 'Google Sheets', 'Microsoft Office (Word, Excel, PowerPoint)', 'Wix']},
-      {experience_ja: '2年以上', experience_en: '2+ years', items_ja: ['Adobe Premiere', 'Grasshopper', 'Twinmotion'], items_en: ['Adobe Premiere', 'Grasshopper', 'Twinmotion']},
-      {experience_ja: '1年未満', experience_en: '0–1 year', items_ja: ['AutoCAD', 'Archicad'], items_en: ['AutoCAD', 'Archicad']},
-    ],
+    skills: [],
     philosophy_heading_ja: 'フィロソフィー', philosophy_heading_en: 'Philosophy',
-    philosophy_ja: [
-      '詩を書くように、建築をデザインしたい。',
-      '私のデザインが、生涯にわたって誰かを支え続けるものであってほしい。心に永く残り、必要なときに私たちを救ってくれる美しい詩のような、やさしい言葉を思わせる建築をつくりたいと考えています。',
-      '人類の歴史は、いつも成功と発展だけで築かれてきたわけではありません。人生には、悲しみや苦しみに満ちた瞬間があります。私たちは常に前へ進み、より良く変わり続けられるとは限りません。だからこそ、多くの人の人生をそっと包み込み、ともに歩む建築をデザインしたいと思います。',
-      '痛みの中にいるとき、その痛みをきちんと感じられるように。',
-      '幸せなとき、その幸せを感じられるように。',
-      '誰もが偽りなく、正直な自分でいられるように。',
-      'それを可能にするのは、どのような空間でしょうか。',
-      '人が人であり続けるために。',
-      '哲学が永遠に存在し続けるために。',
-      '人の感情を建築空間に映すことで、私たちは空間と一つになれます。それによって、自分の居場所を愛おしく思い、自分自身を愛し、より良い人生へとつながっていくのだと信じています。',
-    ],
-    philosophy_en: [
-      'I want to design architecture as if I were writing a poem.',
-      "I would like my design to keep supporting someone throughout their life. I want to create architecture like gentle words—a beautiful poem that stays in one's mind forever and saves us when needed.",
-      "Human history has not always been about success and development. During our lives, there are moments full of sorrow and suffering. We may not always move forward or continue changing for the better. I would like to design architecture that gently embraces people's lives and walks alongside them.",
-      'I want people to feel their pain when they are in pain.',
-      'I want people to feel happiness when they are happy.',
-      'I want people to be their genuine and honest selves.',
-      'What kind of space makes this possible?',
-      'For humans to remain human.',
-      'For philosophy to exist forever.',
-      'Reflecting human emotions in architectural space allows us to merge with that space. I believe this helps us cherish the places where we belong, and leads us to love ourselves and live better lives.',
-    ],
+    philosophy_ja: [],
+    philosophy_en: [],
     signature: 'HANA MURAKAMI',
   },
   preview: {prepare: () => ({title: 'Designer Profile', subtitle: 'About page content'})},
 })
 
-export const designerProfileTypes = [timelineEntry, featuredEntry, skillGroup, designerProfile]
+export const designerProfileTypes = [timelineEntry, featuredItem, featuredEntry, skillGroup, designerProfile]
