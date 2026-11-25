@@ -26,7 +26,7 @@
 ## 3. Designerページ（プロフィール）を編集する
 
 1. 左側の `Designer Profile` を開き、既存のプロフィールを選択します。まだ無い場合は新規作成します。
-2. `Role`、名前、Portrait、経歴、Featured、Skills、Philosophyを編集します。
+2. `Role`、名前、Portrait、経歴、Featuredを編集します。Featuredの各項目には任意でリンクを設定できます。
 3. 日本語と英語の項目は、それぞれの言語欄に入力します。経歴・Featured・Skillsは配列の追加、削除、並べ替えができます。
 4. `Publish`を押し、公開サイトのDesignerページを日本語・英語の両方で確認します。
 

@@ -43,7 +43,7 @@ export const DESIGNER_PROFILE_QUERY = /* groq */ `
   "portraitAlt_ja": portrait.alt_ja, "portraitAlt_en": portrait.alt_en,
   timeline[]{year, text_ja, text_en},
   featured_heading_ja, featured_heading_en,
-  featured[]{year, items_ja, items_en},
+  featured[]{year, items_ja[]{title_ja, title_en, url}, items_en[]{title_ja, title_en, url}},
   skills_heading_ja, skills_heading_en,
   skills[]{experience_ja, experience_en, items_ja, items_en},
   philosophy_heading_ja, philosophy_heading_en, philosophy_ja, philosophy_en,

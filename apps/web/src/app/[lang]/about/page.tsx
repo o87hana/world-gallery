@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Lan
     lang,
     path: "/about",
     title: lang === "ja" ? "デザイナー 村上花" : "Designer Hana Murakami",
-    description: lang === "ja" ? "村上花の経歴、スキル、建築に対する思想を紹介します。" : "Hana Murakami's biography, skills, and architectural philosophy.",
+    description: lang === "ja" ? "村上花の経歴と主な選出歴を紹介します。" : "Hana Murakami's biography and featured work.",
   });
 }
 
@@ -50,7 +50,15 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: La
                 <div key={entry.year} className="grid gap-1 sm:grid-cols-[4rem_1fr] sm:gap-4">
                   <dt className="font-semibold text-[#0f1230]">{entry.year}</dt>
                   <dd className="space-y-1">
-                    {entry.items.map((item) => <p key={item}>{item}</p>)}
+                    {entry.items.map((item) => (
+                      <p key={item.title}>
+                        {item.url ? (
+                          <a href={item.url} target="_blank" rel="noreferrer" className="underline decoration-current underline-offset-2 hover:opacity-70">
+                            {item.title}
+                          </a>
+                        ) : item.title}
+                      </p>
+                    ))}
                   </dd>
                 </div>
               ))}
@@ -72,7 +80,7 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: La
         </div>
       </div>
 
-      <div className="mt-16 border-t-4 border-[#0f1230] pt-12">
+      {content.skills.length > 0 && <div className="mt-16 border-t-4 border-[#0f1230] pt-12">
         <div className="space-y-8 text-sm text-[#3b3f58]">
           <div className="flex items-start gap-6">
             <span className="mt-1 h-10 w-1.5 bg-[#121a4d]" aria-hidden="true" />
@@ -89,9 +97,9 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: La
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
-      <div className="mt-16 border-t-4 border-[#0f1230] pt-12">
+      {content.philosophy.length > 0 && <div className="mt-16 border-t-4 border-[#0f1230] pt-12">
         <div className="space-y-6 text-sm leading-relaxed text-[#3b3f58]">
           <div className="flex items-start gap-6">
             <span className="mt-1 h-10 w-1.5 bg-[#121a4d]" aria-hidden="true" />
@@ -102,7 +110,7 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: La
           {content.philosophy.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           <p className="pt-4 font-semibold text-[#0f1230]">{content.signature}</p>
         </div>
-      </div>
+      </div>}
     </section>
   );
 }
