@@ -26,7 +26,7 @@ Hana Murakamiさんの作品を「場所」と結び付け、3D地球儀とGalle
 - sitemapとrobots
 - 320px幅からデスクトップまでのレスポンシブ対応
 
-公開サイト: [https://world-gallery-studio.vercel.app/](https://world-gallery-studio.vercel.app/)
+公開サイト: [https://world-gallery-hana-murakamis-projects.vercel.app/](https://world-gallery-hana-murakamis-projects.vercel.app/)
 
 Sanity Studio: [https://world-gallery-studio.sanity.studio/](https://world-gallery-studio.sanity.studio/)
 
@@ -72,11 +72,11 @@ Sanity Studio: [https://world-gallery-studio.sanity.studio/](https://world-galle
 
 ## 6. 現在の確認・設定待ち
 
-- Studio内Preview連携
+- Studio内Preview連携（Presentation設定済み）
 - 編集者アカウントの招待と権限
 - Editor権限のAPIトークン失効とViewerトークンへの最小権限化
-- 本番Contactメールの実送信確認
-- Sanity公開変更のWebhook自動反映
+- 本番Contactメールの実送信確認（送信成功。受信箱確認待ち）
+- Sanity公開変更のWebhook自動反映（HTTP 200確認済み）
 - Vercel／Sanity／Resendを含む最終本番受け入れ
 
 これらは作品編集機能そのものとは分けて管理し、認証情報を会議資料へ記載しません。

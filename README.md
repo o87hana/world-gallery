@@ -2,7 +2,7 @@
 
 Hana Murakamiの作品を場所と結び付け、3D地球儀とGalleryから閲覧できる日英対応ポートフォリオです。作品はSanity Studioから追加・編集し、Next.jsの公開サイトをVercelで配信します。
 
-- 公開サイト: <https://world-gallery-studio.vercel.app/>
+- 公開サイト: <https://world-gallery-hana-murakamis-projects.vercel.app/>
 - Sanity Studio: <https://world-gallery-studio.sanity.studio/>
 - 編集者向け資料: [`docs/editor-guide-ja.md`](docs/editor-guide-ja.md)
 - 管理・復旧手順: [`docs/operations-ja.md`](docs/operations-ja.md)
@@ -124,7 +124,7 @@ Preview開始URLは次の形式です。
 
 公開データはSanity CDNとNext.js Data Cacheを使用し、地球儀、Gallery、作品詳細、sitemapごとのタグを付けて1時間ごとに再検証します。Preview Modeはキャッシュを使わず、常にSanityのDrafts APIから取得します。再検証中の取得失敗では直前の成功データを維持し、初回取得自体が失敗した場合は各言語ルートのerror UIで扱います。
 
-Sanity Webhookの受信APIは`POST /api/revalidate`に実装済みです。本番Webhookの接続が完了するまでは、通常は公開後おおむね1時間以内に自動更新されます。即時かつ確実に反映する必要がある場合はWebを再デプロイしてください。本番接続と実動作確認はTASK-032で行います。
+Sanity Webhookは本番の`POST /api/revalidate`へ接続済みです。公開済みWorkの作成・更新・削除時に、地球儀、Gallery、作品詳細、sitemapのキャッシュを自動で再検証します。Webhookが一時的に失敗した場合も、1時間ごとの再検証がフォールバックとして動作します。
 
 ## デプロイと復旧
 

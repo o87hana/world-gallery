@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 import { SANITY_CACHE_TAGS } from "@/lib/sanity.cache";
 
 type SanityWebhookPayload = {
-  _type: "work";
+  _type: "work" | "designerProfile";
   slug?: string;
 };
 
@@ -15,17 +15,18 @@ function parsePayload(rawBody: string): SanityWebhookPayload | null {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
 
     const payload = value as Record<string, unknown>;
-    if (payload._type !== "work") return null;
+    if (payload._type !== "work" && payload._type !== "designerProfile") return null;
     if (payload.slug !== undefined && typeof payload.slug !== "string") return null;
 
     const slug = typeof payload.slug === "string" ? payload.slug.trim() : undefined;
-    return { _type: "work", slug: slug || undefined };
+    return { _type: payload._type, slug: slug || undefined };
   } catch {
     return null;
   }
 }
 
-function revalidationTags(slug?: string) {
+function revalidationTags(type: SanityWebhookPayload["_type"], slug?: string) {
+  if (type === "designerProfile") return [SANITY_CACHE_TAGS.designerProfile];
   const tags: string[] = [
     SANITY_CACHE_TAGS.works,
     SANITY_CACHE_TAGS.pins,
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     return Response.json({ revalidated: false, error: "Invalid payload" }, { status: 400 });
   }
 
-  const tags = revalidationTags(payload.slug);
+  const tags = revalidationTags(payload._type, payload.slug);
   for (const tag of tags) {
     revalidateTag(tag, { expire: 0 });
   }

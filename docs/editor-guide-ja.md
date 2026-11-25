@@ -6,7 +6,7 @@
 
 ## 1. 利用する画面
 
-- 公開サイト: [https://world-gallery-studio.vercel.app/](https://world-gallery-studio.vercel.app/)
+- 公開サイト: [https://world-gallery-hana-murakamis-projects.vercel.app/](https://world-gallery-hana-murakamis-projects.vercel.app/)
 - 管理画面（Sanity Studio）: [https://world-gallery-studio.sanity.studio/](https://world-gallery-studio.sanity.studio/)
 - SanityプロジェクトID: `kmx5m7v5`
 - Dataset: `production`
@@ -19,11 +19,20 @@
 2. 招待されたメールアドレスでSanityアカウントを作成、またはログインします。
 3. 管理画面URLを開きます。
 4. プロジェクト名が `world-gallery-studio`、Project IDが `kmx5m7v5` であることを確認します。
-5. 左側の一覧から `Work` を開きます。
+5. 左側の一覧から `Work` または `Designer Profile` を開きます。
 
 ログインできない場合は、使用中のメールアドレスがSanityプロジェクトのメンバーとして招待されているか、管理者へ確認してください。APIトークンやPreview secretは編集者へ配布しません。
 
-## 3. 作品を新規追加する
+## 3. Designerページ（プロフィール）を編集する
+
+1. 左側の `Designer Profile` を開き、既存のプロフィールを選択します。まだ無い場合は新規作成します。
+2. `Role`、名前、Portrait、経歴、Featured、Skills、Philosophyを編集します。
+3. 日本語と英語の項目は、それぞれの言語欄に入力します。経歴・Featured・Skillsは配列の追加、削除、並べ替えができます。
+4. `Publish`を押し、公開サイトのDesignerページを日本語・英語の両方で確認します。
+
+プロフィールは1件だけ作成してください。未入力の言語項目には、以前のサイト表示内容がフォールバックとして使われます。
+
+## 4. 作品を新規追加する
 
 1. `Work` を開き、右上の新規作成ボタンを押します。
 2. 次の「基本情報」を入力します。
@@ -151,8 +160,8 @@ Sanityには、次の2つの状態があります。
 ### 公開中の作品を編集する
 
 - 編集中の変更は、`Publish`するまで公開サイトへ反映されません。
-- `Publish`後、作品詳細は更新されますが、現行運用では地球儀とGalleryへの確実な反映に管理者によるWeb再デプロイが必要です。
-- Webhookによる自動反映は現在整備中です。公開後、作品名とSlugを管理者へ伝えてください。
+- `Publish`後、Webhookにより作品詳細、地球儀、Galleryへ自動反映されます。
+- 通常はWebの再デプロイや管理者への反映依頼は不要です。反映されない場合だけ作品名とSlugを管理者へ伝えてください。
 - 更新後は必ず日本語・英語の両ページを確認します。
 
 ### 一般公開から取り下げる
@@ -168,12 +177,12 @@ Sanityには、次の2つの状態があります。
 
 非公開作品は、通常の公開URLを直接開いても表示されません。Preview Modeを使うと、許可された管理者だけが確認できます。
 
-現時点では、Sanity Studio内のPreviewボタン連携を設定中です。連携完了までは、管理者から発行された安全なPreviewリンクを使用してください。
+Sanity Studioの`Presentation`から公開サイトを開くと、安全な一時Preview URLが自動生成されます。未公開作品の確認や、Studioから作品ページへの移動に利用できます。
 
 - Previewリンクには秘密情報が含まれるため、メール転送、チャット転載、スクリーンショット掲載を避けます。
 - Preview中は画面上部にPreview表示が出ます。
 - 確認後は`Exit preview`を押します。
-- Preview secretやAPIトークンを編集者自身で設定する必要はありません。
+- Preview secretやAPIトークンを編集者自身で設定する必要はありません。Presentationが一時秘密値を管理します。
 
 ## 8. 公開前チェックリスト
 
@@ -215,7 +224,7 @@ Sanityには、次の2つの状態があります。
 - `Published`がONか確認します。
 - Slug、Category、Location、Cover Imageの必須エラーがないか確認します。
 - ページを再読み込みします。
-- 新規作品や地球儀・Galleryの変更は、作品名とSlugを管理者へ伝え、Web再デプロイを依頼します。
+- 数分待って再読み込みしても反映されない場合は、作品名とSlugを管理者へ伝え、Webhookの確認を依頼します。
 
 ### 地球儀の場所が違う
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getAboutContent } from "@/lib/about";
+import { getSanityDesignerProfile } from "@/lib/sanity.data";
 import type { Lang } from "@/lib/i18n";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -16,7 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Lan
 
 export default async function AboutPage({ params }: { params: Promise<{ lang: Lang }> }) {
   const { lang } = await params;
-  const content = getAboutContent(lang);
+  const profile = await getSanityDesignerProfile();
+  const content = getAboutContent(lang, profile);
 
   return (
     <section className="rounded-2xl bg-[#f6f2ea] px-6 py-10 text-[#0f1230] shadow-lg sm:px-12 sm:py-14">
@@ -59,7 +61,7 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: La
         <div className="flex justify-center lg:justify-end">
           <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-md">
             <Image
-              src="/designerphoto.avif"
+              src={content.portraitUrl || "/designerphoto.avif"}
               alt={content.portraitAlt}
               width={594}
               height={594}
