@@ -36,6 +36,21 @@ export const SITEMAP_WORKS_QUERY = /* groq */ `
 }
 `;
 
+export const DESIGNER_PROFILE_QUERY = /* groq */ `
+*[_type == "designerProfile"] | order(_updatedAt desc)[0] {
+  role_ja, role_en, name_ja, name_en,
+  "portraitUrl": portrait.asset->url,
+  "portraitAlt_ja": portrait.alt_ja, "portraitAlt_en": portrait.alt_en,
+  timeline[]{year, text_ja, text_en},
+  featured_heading_ja, featured_heading_en,
+  featured[]{year, items_ja, items_en},
+  skills_heading_ja, skills_heading_en,
+  skills[]{experience_ja, experience_en, items_ja, items_en},
+  philosophy_heading_ja, philosophy_heading_en, philosophy_ja, philosophy_en,
+  signature
+}
+`;
+
 const workBySlugProjection = /* groq */ `{
   "id": _id,
   "slug": slug.current,

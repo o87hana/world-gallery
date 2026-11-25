@@ -73,19 +73,19 @@ Studio公開後、ログイン、Work一覧、既存作品の編集画面が開�
 1. 作品フィールドの`Published`をONにする
 2. Sanityの`Publish`を実行する
 
-公開データは1時間ごとに自動再検証されます。再検証中にSanity取得が失敗した場合は直前の成功データが維持され、キャッシュがない初回取得の失敗はWebのerror UIに表示されます。Preview Modeはキャッシュを使用しません。
+公開データはSanity Webhookで変更時に再検証され、1時間ごとの再検証もフォールバックとして動作します。再検証中にSanity取得が失敗した場合は直前の成功データが維持され、キャッシュがない初回取得の失敗はWebのerror UIに表示されます。Preview Modeはキャッシュを使用しません。
 
-Webhook受信APIは`POST /api/revalidate`に実装済みです。本番Webhookの接続が完了するまでは、即時かつ確実に反映する必要がある場合はWebを再デプロイしてください。
+Webhook受信APIは本番の`POST /api/revalidate`へ接続済みです。現在のWork向け設定を、Designer Profileも対象に含む以下の設定へ更新してください。Sanityの配信ログでHTTP 200と`revalidated: true`を確認します。
 
-TASK-032ではSanity Manageの`API > Webhooks`に次の1件を作成します。受信APIが本番へデプロイされる前に有効化しません。
+Sanity Manageの`API > Webhooks`で、次の1件を設定します。
 
 | 項目 | 設定値 |
 |---|---|
 | Name | `World Gallery cache revalidation` |
-| URL | `https://world-gallery-studio.vercel.app/api/revalidate` |
+| URL | `https://world-gallery-hana-murakamis-projects.vercel.app/api/revalidate` |
 | Dataset | `production` |
 | Trigger on | Create / Update / Delete |
-| Filter | `_type == "work"` |
+| Filter | `_type in ["work", "designerProfile"]` |
 | Projection | `{ "_type": coalesce(after()._type, before()._type), "slug": coalesce(after().slug.current, before().slug.current) }` |
 | HTTP method | `POST` |
 | Drafts / Versions | どちらもOFF |
@@ -129,7 +129,8 @@ https://<web-host>/api/preview?secret=<secret>&slug=<slug>&lang=ja
 2. `Published`がONか確認します。
 3. Project IDとdatasetが`kmx5m7v5/production`か確認します。
 4. 必須項目、slug、位置情報を確認します。
-5. 現行運用ではWebを再デプロイします。
+5. SanityのWebhook配信ログを確認し、失敗している場合は原因を修正します。
+6. 緊急時のみWebを再デプロイします。
 
 ### Contactだけ送信できない
 
@@ -149,7 +150,7 @@ https://<web-host>/api/preview?secret=<secret>&slug=<slug>&lang=ja
 
 - Web: Vercelで直前の正常なProduction Deploymentを再昇格します。
 - コード: 正常なGitコミットを特定し、修正用ブランチで変更を戻して再検証します。
-- 作品の誤公開: まず`Published`をOFFにしてPublishし、現行運用ではWebを再デプロイします。
+- 作品の誤公開: まず`Published`をOFFにしてPublishし、公開サイトから取り下げられたことを確認します。
 - Sanityの誤編集: 対象ドキュメントの履歴を確認し、内容を復元してからPublishします。
 - 削除: テスト作品以外を削除しません。削除が必要な場合は対象と復旧方法を事前確認します。
 

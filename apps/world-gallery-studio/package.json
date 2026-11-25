@@ -24,13 +24,14 @@
   ],
   "dependencies": {
     "@sanity/vision": "^6.15.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "sanity": "^6.15.0",
     "styled-components": "^6.5.3"
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "^6.0.0",
+    "@types/node": "^26.6.2",
     "@types/react": "^19.2.18",
     "eslint": "^9.28",
     "patch-package": "^8.0.1",

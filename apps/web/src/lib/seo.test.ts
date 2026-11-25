@@ -5,7 +5,7 @@ describe("SEO metadata", () => {
   it("creates canonical and hreflang URLs for a Japanese page", () => {
     const metadata = createPageMetadata({ lang: "ja", path: "/gallery", title: "Gallery" });
 
-    expect(SITE_URL.href).toBe("https://world-gallery-studio.vercel.app/");
+    expect(SITE_URL.href).toBe("https://world-gallery-hana-murakamis-projects.vercel.app/");
     expect(metadata.alternates).toEqual({
       canonical: "/ja/gallery",
       languages: {

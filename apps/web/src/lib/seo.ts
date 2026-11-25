@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Lang } from "@/lib/i18n";
 
-export const SITE_URL = new URL("https://world-gallery-studio.vercel.app/");
+export const SITE_URL = new URL("https://world-gallery-hana-murakamis-projects.vercel.app/");
 export const SITE_NAME = "World Gallery — Hana Murakami";
 export const DEFAULT_OG_IMAGE = "/designerphoto.avif";
 

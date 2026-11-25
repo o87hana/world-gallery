@@ -27,6 +27,29 @@ export type AboutContent = {
   philosophyHeading: string;
   philosophy: string[];
   signature: string;
+  portraitUrl?: string;
+};
+
+export type SanityDesignerProfile = {
+  role_ja?: string;
+  role_en?: string;
+  name_ja?: string;
+  name_en?: string;
+  portraitUrl?: string;
+  portraitAlt_ja?: string;
+  portraitAlt_en?: string;
+  timeline?: {year?: string; text_ja?: string; text_en?: string}[];
+  featured_heading_ja?: string;
+  featured_heading_en?: string;
+  featured?: {year?: string; items_ja?: string[]; items_en?: string[]}[];
+  skills_heading_ja?: string;
+  skills_heading_en?: string;
+  skills?: {experience_ja?: string; experience_en?: string; items_ja?: string[]; items_en?: string[]}[];
+  philosophy_heading_ja?: string;
+  philosophy_heading_en?: string;
+  philosophy_ja?: string[];
+  philosophy_en?: string[];
+  signature?: string;
 };
 
 const sharedFeatured = [
@@ -125,6 +148,32 @@ export const aboutContent = {
   },
 } satisfies Record<Lang, AboutContent>;
 
-export function getAboutContent(lang: Lang): AboutContent {
-  return aboutContent[lang];
+export function getAboutContent(lang: Lang, profile?: SanityDesignerProfile | null): AboutContent {
+  const fallback = aboutContent[lang];
+  if (!profile) return fallback;
+  const suffix = lang === "ja" ? "ja" : "en";
+  const textKey = `text_${suffix}` as const;
+  const itemsKey = `items_${suffix}` as const;
+  const experienceKey = `experience_${suffix}` as const;
+  return {
+    ...fallback,
+    role: profile[`role_${suffix}`] ?? fallback.role,
+    name: profile[`name_${suffix}`] ?? fallback.name,
+    portraitAlt: profile[`portraitAlt_${suffix}`] ?? fallback.portraitAlt,
+    portraitUrl: profile.portraitUrl,
+    timeline: profile.timeline
+      ? profile.timeline.filter((entry) => entry.year && entry[textKey]).map((entry) => ({year: entry.year!, text: entry[textKey]!}))
+      : fallback.timeline,
+    featuredHeading: profile[`featured_heading_${suffix}`] ?? fallback.featuredHeading,
+    featured: profile.featured
+      ? profile.featured.filter((entry) => entry.year).map((entry) => ({year: entry.year!, items: entry[itemsKey] || []}))
+      : fallback.featured,
+    skillsHeading: profile[`skills_heading_${suffix}`] ?? fallback.skillsHeading,
+    skills: profile.skills
+      ? profile.skills.filter((group) => group[experienceKey]).map((group) => ({experience: group[experienceKey]!, items: group[itemsKey] || []}))
+      : fallback.skills,
+    philosophyHeading: profile[`philosophy_heading_${suffix}`] ?? fallback.philosophyHeading,
+    philosophy: profile[`philosophy_${suffix}`] ?? fallback.philosophy,
+    signature: profile.signature ?? fallback.signature,
+  };
 }

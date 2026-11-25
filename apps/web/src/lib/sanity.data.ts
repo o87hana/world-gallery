@@ -1,6 +1,7 @@
 import type { QueryParams } from "@sanity/client";
 import {
   GALLERY_QUERY,
+  DESIGNER_PROFILE_QUERY,
   PINS_QUERY,
   PREVIEW_WORK_BY_SLUG_QUERY,
   PUBLIC_WORK_BY_SLUG_QUERY,
@@ -9,6 +10,7 @@ import {
 import { getPublicSanityClient, getServerSanityContext } from "@/lib/sanity.server";
 import { SANITY_CACHE_TAGS } from "@/lib/sanity.cache";
 import type { WorkCard, WorkDetail, WorkPin } from "@/lib/work";
+import type { SanityDesignerProfile } from "@/lib/about";
 
 const SANITY_REVALIDATE_SECONDS = 60 * 60;
 
@@ -67,5 +69,12 @@ export function getSanitySitemapWorks() {
     SITEMAP_WORKS_QUERY,
     {},
     publicFetchOptions([SANITY_CACHE_TAGS.works, SANITY_CACHE_TAGS.sitemap]),
+  );
+}
+
+export function getSanityDesignerProfile() {
+  return fetchForCurrentMode<SanityDesignerProfile | null>(
+    DESIGNER_PROFILE_QUERY,
+    [SANITY_CACHE_TAGS.designerProfile],
   );
 }
